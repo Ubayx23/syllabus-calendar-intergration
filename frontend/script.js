@@ -13,7 +13,7 @@ form.addEventListener("submit", (e) => {
   };
   console.log(newEvent);
 
-  fetch("http://127.0.0.1:5000/events", {
+  fetch("/events", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(newEvent),
@@ -25,7 +25,7 @@ form.addEventListener("submit", (e) => {
   document.getElementById("event-list").appendChild(item);
 });
 
-fetch("http://127.0.0.1:5000/events")
+fetch("/events")
   .then((response) => response.json())
   .then((events) => {
     events.forEach((event) => {

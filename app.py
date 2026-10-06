@@ -1,9 +1,13 @@
 # Import Flask so Pyhton can act as a web server 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 # SQLite stores information
 import sqlite3
+import os
 
-db = sqlite3.connect("events.db")
+# Vercel only allows writing to /tmp
+DB_PATH = "/tmp/events.db" if os.environ.get("VERCEL") else "events.db"
+
+db = sqlite3.connect(DB_PATH)
 
 # Create table with 3 columns
 db.execute("CREATE TABLE IF NOT EXISTS events (course TEXT, title TEXT, date TEXT)")
@@ -20,14 +24,18 @@ CORS(app)
 
 @app.route("/")
 def home():
-    return "Backend is running"
+    return send_from_directory("frontend", "index.html")
+
+@app.route("/script.js")
+def script():
+    return send_from_directory("frontend", "script.js")
 
 # When frontend sends a new event to /events, save it
 @app.route("/events", methods=["POST"])
 def add_event():
     data = request.get_json() # read data
 
-    db = sqlite3.connect("events.db")
+    db = sqlite3.connect(DB_PATH)
 
     db.execute("INSERT INTO events (course, title, date) VALUES (?, ?, ?)", (data["course"], data["title"], data["date"]))               
                
@@ -42,7 +50,7 @@ def add_event():
 @app.route("/events", methods=["GET"])
 def get_events():
 
-    db = sqlite3.connect("events.db")
+    db = sqlite3.connect(DB_PATH)
 
     rows = db.execute("SELECT course, title, date FROM events").fetchall()
 
